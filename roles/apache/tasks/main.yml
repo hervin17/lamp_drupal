@@ -1,0 +1,42 @@
+---
+# tasks file for apache
+
+- name: install apache2
+  apt: name={{ item }} state=present 
+  with_items:
+    - apache2
+    - libpcre3-dev
+  
+
+- name: activer le module apache rewrite
+  apache2_module: name=rewrite state=present
+  notify: restart apache
+- name: mettre apache virtualhost pour le developpement de drupal
+  template:
+    src: "drupal.dev.conf.j2"
+    dest: "/etc/apache2/sites-available/{{ domain }}.dev.conf"
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart apache
+ 
+- name: creer un lien entre les fichiers des deux repetoires
+  file:
+    src: "/etc/apache2/sites-available/{{ domain }}.dev.conf"
+    dest: "/etc/apache2/sites-enabled/{{ domain }}.dev.conf"
+    state: link
+  notify: restart apache
+- name: effacer le ficheirepr defaut de apache
+  file: 
+    path: "/etc/apache2/sites-enabled/000-default.conf"
+    state: absent
+  notify: restart apache
+
+- name: ajuster le opcache memory
+  lineinfile: 
+    dest: "/etc/php/7.1/apache2/conf.d/10-opcache.ini"
+    regexp: "^opcache.memory_consomption"
+    line: "opcache.memory_consumption = 96 "
+    state: present
+  notify: restart apache
+

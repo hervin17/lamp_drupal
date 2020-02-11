@@ -1,0 +1,6 @@
+---
+# tasks file for firewall
+
+- name: arreter le firewall
+  service: name=ufw state=stopped
+  

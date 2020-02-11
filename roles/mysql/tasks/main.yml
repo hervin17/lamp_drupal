@@ -1,0 +1,29 @@
+---
+# tasks file for mysql
+
+- name: install mysql
+  apt: name={{ item }} state=present
+  with_items:
+    - git
+    - curl
+    - unzip
+    - sendmail
+    - python-mysqldb
+
+- name: start mysql
+  service: name=mysql state=started enabled=yes
+
+- name: supprimmer la bd de test mysql
+  mysql_db: db=test state=absent
+
+- name: creer une base de donnee pour drupal
+  mysql_db: "db={{ domain }} state=present" 
+
+- name: creation d'un uer mysql pour drupal
+  mysql_user:
+    name: "{{ domain }}"
+    password: "1234"
+    priv: "{{ domain }}.*:ALL"
+    host: localhost
+    state: present
+
